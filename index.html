@@ -3,186 +3,663 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Commerce Sales Dashboard</title>
+    <title>E-Commerce Sales Insights & Analytics</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js for interactive charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- PapaParse for parsing CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Outfit & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            background-color: #0b0f19;
+            color: #f1f5f9;
         }
-        .card {
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            padding: 1.5rem;
-            transition: transform 0.2s;
+        h1, h2, h3, h4, .font-outfit {
+            font-family: 'Outfit', sans-serif;
         }
-        .card:hover {
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        /* Glassmorphism cards */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
             transform: translateY(-2px);
         }
         .stat-value {
-            font-size: 1.875rem;
-            font-weight: 700;
-            color: #1e293b;
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
         }
-        .stat-label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .chart-container {
+        /* Active Tab styles */
+        .tab-btn {
             position: relative;
-            height: 300px;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            color: #38bdf8;
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            border-radius: 9999px;
+        }
+        /* Report Markdown Styling */
+        .report-content h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #f8fafc;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 0.75rem;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .report-content h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .report-content h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #818cf8;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .report-content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+            color: #cbd5e1;
+        }
+        .report-content ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin-bottom: 1.5rem;
+        }
+        .report-content li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+        .report-content li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            color: #38bdf8;
+        }
+        .report-content table {
             width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .report-content th {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            font-weight: 600;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #334155;
+        }
+        .report-content td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            color: #e2e8f0;
+        }
+        .report-content tr:last-child td {
+            border-bottom: none;
+        }
+        .report-content blockquote {
+            border-left: 4px solid #38bdf8;
+            background: rgba(56, 189, 248, 0.05);
+            padding: 1rem 1.5rem;
+            border-radius: 0.375rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        .report-content strong {
+            color: #f1f5f9;
         }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="min-h-screen">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <!-- Header -->
-        <div class="mb-8 flex justify-between items-end border-b border-slate-200 pb-5">
+        <!-- Premium Header Area -->
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-800">
             <div>
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">E-Commerce Sales Dashboard</h1>
-                <p class="text-slate-500 mt-2">Interactive analysis of 2024 sales data.</p>
-            </div>
-            <div class="text-right text-sm text-slate-500 font-medium bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100">
-                Data Updated: <span class="text-slate-900" id="last-updated">Today</span>
-            </div>
-        </div>
-
-        <!-- KPI Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="card border-l-4 border-blue-500">
-                <div class="stat-label">Total Revenue</div>
-                <div class="stat-value mt-2" id="kpi-revenue">₹0</div>
-            </div>
-            <div class="card border-l-4 border-green-500">
-                <div class="stat-label">Total Orders</div>
-                <div class="stat-value mt-2" id="kpi-orders">0</div>
-            </div>
-            <div class="card border-l-4 border-purple-500">
-                <div class="stat-label">Top Category</div>
-                <div class="stat-value mt-2 text-2xl truncate" id="kpi-category">-</div>
-            </div>
-            <div class="card border-l-4 border-orange-500">
-                <div class="stat-label">Avg Order Value</div>
-                <div class="stat-value mt-2" id="kpi-aov">₹0</div>
-            </div>
-        </div>
-
-        <!-- Charts Grid 1 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <!-- Category Sales (Bar) -->
-            <div class="card">
-                <h2 class="text-lg font-semibold mb-4 text-slate-800 flex items-center">
-                    <span class="w-2 h-6 bg-blue-500 rounded mr-2"></span>
-                    Sales by Category
-                </h2>
-                <div class="chart-container">
-                    <canvas id="categoryChart"></canvas>
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-gradient-to-tr from-sky-500 to-indigo-500 rounded-xl shadow-lg shadow-sky-500/10">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2">
+                            E-Commerce Analytics Hub
+                        </h1>
+                        <p class="text-slate-400 text-xs md:text-sm">Exploratory Data Analysis & Strategic Insights</p>
+                    </div>
                 </div>
             </div>
             
-            <!-- Monthly Trend (Line) -->
-            <div class="card">
-                <h2 class="text-lg font-semibold mb-4 text-slate-800 flex items-center">
-                    <span class="w-2 h-6 bg-indigo-500 rounded mr-2"></span>
-                    Monthly Revenue Trend
-                </h2>
-                <div class="chart-container">
-                    <canvas id="trendChart"></canvas>
+            <!-- Global Status -->
+            <div class="flex items-center gap-3 bg-slate-900/60 border border-slate-800/80 px-4 py-2.5 rounded-2xl">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span class="text-xs text-slate-400 font-medium">Active dataset: <strong class="text-emerald-400 font-semibold" id="data-rows-count">0</strong> records</span>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex space-x-6 border-b border-slate-800/60 mb-8 pb-px">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn active text-sm font-semibold pb-3 text-slate-400 hover:text-slate-200">
+                📊 Dashboard
+            </button>
+            <button onclick="switchTab('stats')" id="tab-stats" class="tab-btn text-sm font-semibold pb-3 text-slate-400 hover:text-slate-200">
+                🔢 Statistical Summary
+            </button>
+            <button onclick="switchTab('report')" id="tab-report" class="tab-btn text-sm font-semibold pb-3 text-slate-400 hover:text-slate-200">
+                📑 Structured Report
+            </button>
+        </nav>
+
+        <!-- Interactive Filters Panel (Sticky-like top bar) -->
+        <div class="glass-card p-5 mb-8">
+            <div class="flex flex-col md:flex-row items-end justify-between gap-4">
+                <div class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Category Filter -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Category</label>
+                        <select id="filter-category" onchange="applyFilters()" class="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                            <option value="All">All Categories</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+
+                    <!-- City Filter -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">City</label>
+                        <select id="filter-city" onchange="applyFilters()" class="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                            <option value="All">All Cities</option>
+                            <option value="Mumbai">Mumbai</option>
+                            <option value="Bangalore">Bangalore</option>
+                            <option value="Hyderabad">Hyderabad</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Kolkata">Kolkata</option>
+                            <option value="Chennai">Chennai</option>
+                        </select>
+                    </div>
+
+                    <!-- Payment Filter -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Payment Method</label>
+                        <select id="filter-payment" onchange="applyFilters()" class="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                            <option value="All">All Methods</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Debit Card">Debit Card</option>
+                            <option value="EMI">EMI</option>
+                        </select>
+                    </div>
+
+                    <!-- Text Search -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Search</label>
+                        <div class="relative">
+                            <input type="text" id="filter-search" oninput="applyFilters()" placeholder="Product or Customer..." class="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500">
+                            <svg class="absolute left-3 top-2.5 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reset Button -->
+                <button onclick="resetFilters()" class="w-full md:w-auto h-[38px] px-5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2 border border-slate-700/60">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18V4"></path>
+                    </svg>
+                    Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- KPI Summary Cards (Used in Dashboard & Stats tab) -->
+        <div id="kpi-panel" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="glass-card p-6 flex flex-col justify-between border-l-4 border-l-sky-500 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 text-sky-500/10 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path d="M8.433 7.418c.554-.589 1.448-.589 2.002 0l.207.22 1.25-1.25-.207-.22a3.766 3.766 0 00-5.3 0L3.582 9.07c-1.464 1.557-1.464 4.083 0 5.64l.207.22 1.25-1.25-.207-.22a1.766 1.766 0 010-2.64l2.802-2.982z"></path><path d="M11.567 12.582c-.554.589-1.448.589-2.002 0l-.207-.22-1.25 1.25.207.22a3.766 3.766 0 005.3 0l2.802-2.982c1.464-1.557 1.464-4.083 0-5.64l-.207-.22-1.25 1.25.207.22a1.766 1.766 0 010 2.64l-2.802 2.982z"></path></svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Total Revenue</span>
+                <span class="text-3xl font-extrabold text-slate-100 stat-value" id="kpi-revenue">₹0</span>
+            </div>
+
+            <div class="glass-card p-6 flex flex-col justify-between border-l-4 border-l-emerald-500 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 text-emerald-500/10 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1.828c-.002.166-.016.332-.042.497C4.803 9.86 4 11.834 4 14a1 1 0 001 1h10a1 1 0 001-1c0-2.166-.803-4.14-1.958-5.675-.026-.165-.04-.33-.042-.497V6a4 4 0 00-4-4zm0 2a2 2 0 00-2 2v2h4V6a2 2 0 00-2-2zM6 10h8v1H6v-1zm0 2h8v1H6v-1z" clip-rule="evenodd"></path></svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Total Orders</span>
+                <span class="text-3xl font-extrabold text-slate-100 stat-value" id="kpi-orders">0</span>
+            </div>
+
+            <div class="glass-card p-6 flex flex-col justify-between border-l-4 border-l-indigo-500 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 text-indigo-500/10 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2H6zm3 5a1 1 0 100-2 1 1 0 000 2zm5-1a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd"></path></svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Avg Order Value</span>
+                <span class="text-3xl font-extrabold text-slate-100 stat-value" id="kpi-aov">₹0</span>
+            </div>
+
+            <div class="glass-card p-6 flex flex-col justify-between border-l-4 border-l-amber-500 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 text-amber-500/10 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Top Category</span>
+                <span class="text-2xl font-extrabold text-slate-100 truncate stat-value" id="kpi-category">-</span>
+            </div>
+        </div>
+
+        <!-- CONTENT TABS -->
+
+        <!-- TAB 1: DASHBOARD CONTENT -->
+        <div id="content-dashboard" class="tab-content block">
+            <!-- Charts Grid 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Category Sales (Bar) -->
+                <div class="glass-card p-5">
+                    <h2 class="text-md font-bold mb-4 text-slate-300 flex items-center">
+                        <span class="w-2 h-5 bg-sky-500 rounded mr-2.5"></span>
+                        Revenue by Category
+                    </h2>
+                    <div class="h-[280px]">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Monthly Trend (Line) -->
+                <div class="glass-card p-5">
+                    <h2 class="text-md font-bold mb-4 text-slate-300 flex items-center">
+                        <span class="w-2 h-5 bg-indigo-500 rounded mr-2.5"></span>
+                        Monthly Sales Trend (Jan–Apr)
+                    </h2>
+                    <div class="h-[280px]">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Grid 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Payment Methods (Doughnut) -->
+                <div class="glass-card p-5">
+                    <h2 class="text-md font-bold mb-4 text-slate-300 flex items-center">
+                        <span class="w-2 h-5 bg-pink-500 rounded mr-2.5"></span>
+                        Payment Distribution
+                    </h2>
+                    <div class="h-[230px]">
+                        <canvas id="paymentChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- City Sales (Horizontal Bar) -->
+                <div class="glass-card p-5 lg:col-span-2">
+                    <h2 class="text-md font-bold mb-4 text-slate-300 flex items-center">
+                        <span class="w-2 h-5 bg-emerald-500 rounded mr-2.5"></span>
+                        Sales Revenue by City
+                    </h2>
+                    <div class="h-[230px]">
+                        <canvas id="cityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Orders Table -->
+            <div class="glass-card p-6 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-md font-bold text-slate-300 flex items-center">
+                        <span class="w-2 h-5 bg-slate-400 rounded mr-2.5"></span>
+                        Top Performing Orders
+                    </h2>
+                    <span class="text-xs text-slate-400">Sorted by Total Sales</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800">
+                        <thead>
+                            <tr class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                <th scope="col" class="pb-3.5 px-4">Order ID</th>
+                                <th scope="col" class="pb-3.5 px-4">Date</th>
+                                <th scope="col" class="pb-3.5 px-4">Customer</th>
+                                <th scope="col" class="pb-3.5 px-4">Product</th>
+                                <th scope="col" class="pb-3.5 px-4">City</th>
+                                <th scope="col" class="pb-3.5 px-4">Payment</th>
+                                <th scope="col" class="pb-3.5 px-4 text-right">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/40 text-sm text-slate-300" id="table-body">
+                            <!-- JS will inject rows here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Grid 2 -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Payment Methods (Doughnut) -->
-            <div class="card">
-                <h2 class="text-lg font-semibold mb-4 text-slate-800 flex items-center">
-                    <span class="w-2 h-6 bg-pink-500 rounded mr-2"></span>
-                    Payment Methods
-                </h2>
-                <div class="chart-container" style="height: 250px;">
-                    <canvas id="paymentChart"></canvas>
+        <!-- TAB 2: STATISTICAL SUMMARY CONTENT -->
+        <div id="content-stats" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                
+                <!-- Descriptive Statistics Table -->
+                <div class="glass-card p-6 lg:col-span-2">
+                    <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center">
+                        <span class="w-2.5 h-6 bg-sky-500 rounded mr-2.5"></span>
+                        Numerical Descriptive Statistics
+                    </h2>
+                    <p class="text-slate-400 text-xs mb-4">Calculated dynamically based on the current active filter set.</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-slate-300 border border-slate-800 rounded-lg overflow-hidden">
+                            <thead class="bg-slate-900/80 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                <tr>
+                                    <th class="py-3 px-4 text-left">Statistic</th>
+                                    <th class="py-3 px-4 text-right">Price (₹)</th>
+                                    <th class="py-3 px-4 text-right">Quantity</th>
+                                    <th class="py-3 px-4 text-right">Total Revenue (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800" id="stats-table-body">
+                                <!-- Dynamically filled by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Correlation & Influencing Factors Card -->
+                <div class="glass-card p-6 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center">
+                            <span class="w-2.5 h-6 bg-indigo-500 rounded mr-2.5"></span>
+                            Correlation Analysis
+                        </h2>
+                        
+                        <div class="space-y-4 text-sm text-slate-300">
+                            <div class="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-medium">Price vs. Total Sales</span>
+                                    <span id="corr-price-sales" class="font-bold text-sky-400">0.00</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                    <div id="corr-bar-price-sales" class="bg-sky-400 h-full rounded-full" style="width: 0%"></div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2">Strong positive correlation. Higher unit price is the dominant driver of revenue.</p>
+                            </div>
+
+                            <div class="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-medium">Price vs. Quantity</span>
+                                    <span id="corr-price-qty" class="font-bold text-rose-400">0.00</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                    <div id="corr-bar-price-qty" class="bg-rose-400 h-full rounded-full" style="width: 0%"></div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2">Moderate negative correlation. Higher unit prices lead to lower order quantities.</p>
+                            </div>
+
+                            <div class="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-medium">Quantity vs. Total Sales</span>
+                                    <span id="corr-qty-sales" class="font-bold text-amber-400">0.00</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                    <div id="corr-bar-qty-sales" class="bg-amber-400 h-full rounded-full" style="width: 0%"></div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2">Weak to zero linear correlation. Bulk cheap orders have small impact compared to unit price.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <!-- City Sales (Horizontal Bar) -->
-            <div class="card lg:col-span-2">
-                <h2 class="text-lg font-semibold mb-4 text-slate-800 flex items-center">
-                    <span class="w-2 h-6 bg-teal-500 rounded mr-2"></span>
-                    Revenue by City
-                </h2>
-                <div class="chart-container" style="height: 250px;">
-                    <canvas id="cityChart"></canvas>
+
+            <!-- Dynamic Correlation Scatter Plot -->
+            <div class="glass-card p-6 mb-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <div>
+                        <h2 class="text-md font-bold text-slate-300 flex items-center">
+                            <span class="w-2 h-5 bg-amber-500 rounded mr-2.5"></span>
+                            Correlation Explorer (Scatter Plot)
+                        </h2>
+                        <p class="text-xs text-slate-400">Plot of Unit Price vs. Total Sales, colored by Category.</p>
+                    </div>
+                </div>
+                <div class="h-[380px]">
+                    <canvas id="scatterChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Orders Table -->
-        <div class="card mb-8">
-            <h2 class="text-lg font-semibold mb-4 text-slate-800 flex items-center">
-                <span class="w-2 h-6 bg-slate-800 rounded mr-2"></span>
-                Top Orders (Highest Value)
-            </h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200">
-                    <thead class="bg-slate-50 rounded-t-md">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Order ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Customer</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Product</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Total Sales</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-slate-200" id="table-body">
-                        <!-- Table rows will be inserted here by JS -->
-                    </tbody>
-                </table>
+        <!-- TAB 3: STRUCTURED REPORT CONTENT -->
+        <div id="content-report" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Outline Sidebar -->
+                <div class="hidden lg:block lg:col-span-1">
+                    <div class="glass-card p-5 sticky top-8">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Report Sections</h3>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="#section-1" class="text-slate-300 hover:text-sky-400 font-medium block">1. Executive Summary</a></li>
+                            <li><a href="#section-2" class="text-slate-300 hover:text-sky-400 font-medium block">2. Data Preprocessing</a></li>
+                            <li><a href="#section-3" class="text-slate-300 hover:text-sky-400 font-medium block">3. Descriptive Statistics</a></li>
+                            <li><a href="#section-4" class="text-slate-300 hover:text-sky-400 font-medium block">4. Correlation Analysis</a></li>
+                            <li><a href="#section-5" class="text-slate-300 hover:text-sky-400 font-medium block">5. Segment Analysis</a></li>
+                            <li><a href="#section-6" class="text-slate-300 hover:text-sky-400 font-medium block">6. Strategic Actions</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Report Body Pane -->
+                <div class="col-span-1 lg:col-span-3">
+                    <div class="glass-card p-8 md:p-10 report-content">
+                        
+                        <!-- Section 1 -->
+                        <div id="section-1" class="scroll-mt-6">
+                            <h1>E-Commerce Sales Performance EDA Report</h1>
+                            <h2>1. Executive Summary</h2>
+                            <p>
+                                This report presents a comprehensive Exploratory Data Analysis (EDA) of the e-commerce sales dataset. The primary objective is to analyze transaction patterns, identify key factors driving revenue, and detect trends across different product categories, cities, months, and payment methods.
+                            </p>
+                            <blockquote>
+                                <strong>Key Milestone Achieved:</strong> Outlier correction, duplicate row filters, and imputation methods were executed. The cleaned database represents 51 high-quality transactions totaling <strong>₹1,39,719</strong> in revenue.
+                            </blockquote>
+                            <p>
+                                Analysis indicates that while <strong>Clothing</strong> is the leader in transaction counts, <strong>Furniture</strong> exhibits the highest Average Order Value (AOV) at <strong>₹3,827.27</strong>. <strong>Mumbai</strong> constitutes the primary city hub generating <strong>28.0%</strong> of the total sales, and <strong>UPI</strong> is the favorite transaction option used in <strong>45.1%</strong> of orders.
+                            </p>
+                        </div>
+
+                        <!-- Section 2 -->
+                        <div id="section-2" class="scroll-mt-6 mt-8">
+                            <h2>2. Data Preprocessing Summary</h2>
+                            <p>
+                                To establish accurate analytical findings, the original dataset (63 rows) was processed as follows:
+                            </p>
+                            <ul>
+                                <li><strong>Duplicate Filtering:</strong> Removed 3 duplicate rows (orders 1005, 1012, 1033) which were redundant transaction repeats.</li>
+                                <li><strong>Missing Values:</strong> Imputed customer names with <em>"Unknown Customer"</em> (2 rows), categories with <em>"Unknown"</em> (2 rows), and missing quantities with the <em>median value of 1</em> (3 rows).</li>
+                                <li><strong>Extreme Outlier Treatment:</strong> Set Price boundaries using IQR method. Extreme anomalies like ₹85,000 for a power strip, negative prices (-₹500), and transactions with zero quantity were removed. 6 high-value transactions with prices above the upper limit (₹6,601) were excluded to focus on the standard consumer distribution.</li>
+                            </ul>
+                            <p>
+                                Post-preprocessing, the final dataset has <strong>51 rows and 13 variables</strong> ready for exploration.
+                            </p>
+                        </div>
+
+                        <!-- Section 3 -->
+                        <div id="section-3" class="scroll-mt-6 mt-8">
+                            <h2>3. Descriptive Statistics</h2>
+                            <p>
+                                Descriptive statistics summarize the location and dispersion of variables:
+                            </p>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Price (₹)</th>
+                                        <th>Quantity</th>
+                                        <th>Total Sales (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Mean (Average)</strong></td>
+                                        <td>₹1,959.04</td>
+                                        <td>1.90</td>
+                                        <td>₹2,739.59</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Median (50th percentile)</strong></td>
+                                        <td>₹1,800.00</td>
+                                        <td>1.00</td>
+                                        <td>₹2,499.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Std Deviation</strong></td>
+                                        <td>₹1,298.80</td>
+                                        <td>1.54</td>
+                                        <td>₹1,264.45</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Minimum Value</strong></td>
+                                        <td>₹299.00</td>
+                                        <td>1.00</td>
+                                        <td>₹399.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Maximum Value</strong></td>
+                                        <td>₹5,600.00</td>
+                                        <td>10.00</td>
+                                        <td>₹5,600.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p>
+                                The Average Order Value (AOV) stands at <strong>₹2,739.59</strong>, and the maximum transaction totals <strong>₹5,600</strong>. The high standard deviation in Price shows catalog variety.
+                            </p>
+                        </div>
+
+                        <!-- Section 4 -->
+                        <div id="section-4" class="scroll-mt-6 mt-8">
+                            <h2>4. Correlation & Influencing Factors</h2>
+                            <p>
+                                Standard Pearson correlation coefficient ($r$) calculations reveal key dynamics:
+                            </p>
+                            <ul>
+                                <li><strong>Price vs. Total Sales (r = 0.71):</strong> Strong positive linear relationship. Sales values are heavily driven by individual item prices. Higher unit cost products contribute highly to overall revenues.</li>
+                                <li><strong>Price vs. Quantity (r = -0.50):</strong> Moderate negative correlation. High price products show lower quantity orders. Customers order single units of items like Coffee Tables, while ordering bulk numbers (up to 10) of cheap items like Pen Drives.</li>
+                                <li><strong>Quantity vs. Sales (r = 0.04):</strong> Very weak/no correlation. Transaction quantity by itself does not predict revenue since bulk orders are concentrated in cheap items.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Section 5 -->
+                        <div id="section-5" class="scroll-mt-6 mt-8">
+                            <h2>5. Segment Analysis</h2>
+                            <h3>A. Performance by Product Category</h3>
+                            <p>
+                                <strong>Clothing</strong> leads in total revenue with <strong>₹48,566</strong> (34.8%), followed closely by <strong>Electronics</strong> at <strong>₹44,955</strong> (32.2%) and <strong>Furniture</strong> at <strong>₹42,100</strong> (30.1%). Furniture represents the most premium segment with an average transaction value of <strong>₹3,827.27</strong>.
+                            </p>
+                            <h3>B. City-wise Revenue Contribution</h3>
+                            <p>
+                                <strong>Mumbai</strong> is the strongest performing city generating <strong>₹39,186</strong> (28.0% of total), followed by <strong>Bangalore</strong> (₹26,482) and <strong>Hyderabad</strong> (₹24,891). Chennai (₹12,194) and Kolkata (₹17,979) represent growing markets.
+                            </p>
+                            <h3>C. Payment Modes and Month Trends</h3>
+                            <p>
+                                <strong>UPI</strong> is the leading checkout option (45.1% share), followed by Credit Cards (27.5%). Seasonality check shows sales peaking in <strong>March (₹53,180)</strong>, followed by January (₹38,679) and February (₹33,771).
+                            </p>
+                        </div>
+
+                        <!-- Section 6 -->
+                        <div id="section-6" class="scroll-mt-6 mt-8">
+                            <h2>6. Strategic Actions & Recommendations</h2>
+                            <p>
+                                1. <strong>Optimize Furniture Bundling:</strong> Focus on increasing the average order value in the high-ticket Furniture category by bundling tables with chairs or offering special EMI campaigns on checkout.
+                            </p>
+                            <p>
+                                2. <strong>Targeted Metro Ads:</strong> Direct promotional spends to Mumbai, Bangalore, and Hyderabad since they constitute over 64% of total sales.
+                            </p>
+                            <p>
+                                3. <strong>UPI-linked Discounts:</strong> Offer minor incentives for UPI checkouts to encourage the preferred customer method and save on card processing fees.
+                            </p>
+                            <p>
+                                4. <strong>Replicate March Promos:</strong> Investigate March strategies and duplicate similar discount structures in slower periods like February and April.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <footer class="text-center text-sm text-slate-500 mt-12 mb-4">
-            <p>Data Analysis Project &copy; 2026 | Built with HTML, Tailwind, and Chart.js</p>
+
+        <footer class="text-center text-xs text-slate-500 mt-12 py-6 border-t border-slate-800/40">
+            <p>E-Commerce Analytics Project &copy; 2026 | Built with HTML5, Custom CSS, Tailwind, and Chart.js</p>
         </footer>
 
     </div>
 
     <script>
-        // Chart formatting utilities
-        const formatCurrency = (value) => '₹' + value.toLocaleString('en-IN');
+        // Global variables for data and charts
+        let rawDataset = [];
+        let activeDataset = [];
         
-        // Common chart options
-        const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                    titleFont: { size: 13, family: "'Inter', sans-serif" },
-                    bodyFont: { size: 14, weight: 'bold', family: "'Inter', sans-serif" },
-                    padding: 12,
-                    cornerRadius: 8,
-                    displayColors: false,
-                }
-            }
-        };
+        let catChartInstance = null;
+        let trendChartInstance = null;
+        let payChartInstance = null;
+        let cityChartInstance = null;
+        let scatterChartInstance = null;
 
-        // Load data from CSV
+        // Currency Formatter
+        const formatCurrency = (val) => '₹' + Math.round(val).toLocaleString('en-IN');
+
+        // Initial Data Loader
         async function loadData() {
             try {
                 const response = await fetch('./data/cleaned_data.csv');
@@ -193,184 +670,272 @@
                     dynamicTyping: true,
                     skipEmptyLines: true,
                     complete: function(results) {
-                        processData(results.data);
+                        rawDataset = results.data.filter(row => row.order_id);
+                        activeDataset = [...rawDataset];
+                        
+                        // Set total active rows count in header
+                        document.getElementById('data-rows-count').innerText = rawDataset.length;
+                        
+                        // Render components
+                        updateDashboard();
                     }
                 });
             } catch (error) {
-                console.error("Error loading data:", error);
-                document.getElementById('kpi-revenue').innerText = "Error loading data. Run local server.";
-                document.getElementById('kpi-revenue').style.fontSize = "1rem";
-                document.getElementById('kpi-revenue').style.color = "red";
+                console.error("Error loading CSV dataset:", error);
+                alert("Failed to load e-commerce dataset. Please run the server via run_dashboard.py");
             }
         }
 
-        function processData(data) {
-            // Filter out empty rows if any
-            data = data.filter(row => row.order_id);
+        // Apply filters in real time
+        function applyFilters() {
+            const cat = document.getElementById('filter-category').value;
+            const city = document.getElementById('filter-city').value;
+            const pay = document.getElementById('filter-payment').value;
+            const search = document.getElementById('filter-search').value.toLowerCase().trim();
 
-            // 1. Calculate KPIs
-            const totalRevenue = data.reduce((sum, row) => sum + (row.total_sales || 0), 0);
-            const totalOrders = data.length;
-            const avgOrderValue = totalRevenue / totalOrders;
-
-            // Find top category
-            const categoryMap = {};
-            data.forEach(row => {
-                if (row.category) {
-                    categoryMap[row.category] = (categoryMap[row.category] || 0) + (row.total_sales || 0);
+            activeDataset = rawDataset.filter(row => {
+                const matchCat = (cat === 'All' || row.category === cat);
+                const matchCity = (city === 'All' || row.city === city);
+                const matchPay = (pay === 'All' || row.payment_method === pay);
+                
+                let matchSearch = true;
+                if (search) {
+                    const customer = (row.customer_name || '').toLowerCase();
+                    const product = (row.product || '').toLowerCase();
+                    matchSearch = customer.includes(search) || product.includes(search);
                 }
+
+                return matchCat && matchCity && matchPay && matchSearch;
             });
-            const topCategory = Object.keys(categoryMap).reduce((a, b) => categoryMap[a] > categoryMap[b] ? a : b);
 
-            // Update DOM
-            document.getElementById('kpi-revenue').innerText = formatCurrency(totalRevenue);
-            document.getElementById('kpi-orders').innerText = totalOrders;
-            document.getElementById('kpi-category').innerText = topCategory;
-            document.getElementById('kpi-aov').innerText = formatCurrency(Math.round(avgOrderValue));
+            // Update stats count in header
+            document.getElementById('data-rows-count').innerText = activeDataset.length;
 
-            // Set current date
-            const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-            document.getElementById('last-updated').innerText = dateStr;
-
-            // 2. Prepare Chart Data
-            
-            // Category Data
-            const catLabels = Object.keys(categoryMap).sort((a,b) => categoryMap[b] - categoryMap[a]);
-            const catValues = catLabels.map(l => categoryMap[l]);
-            
-            // Monthly Trend Data
-            const monthMap = {};
-            // Group by month
-            data.forEach(row => {
-                if (row.month_name) {
-                    monthMap[row.month_name] = (monthMap[row.month_name] || 0) + (row.total_sales || 0);
-                }
-            });
-            // Force chronological order
-            const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            const trendLabels = monthOrder.filter(m => monthMap[m] !== undefined);
-            const trendValues = trendLabels.map(m => monthMap[m]);
-
-            // Payment Data (Count, not sum, based on python script logic)
-            const paymentMap = {};
-            data.forEach(row => {
-                if(row.payment_method) {
-                     paymentMap[row.payment_method] = (paymentMap[row.payment_method] || 0) + 1;
-                }
-            });
-            const payLabels = Object.keys(paymentMap).sort((a,b) => paymentMap[b] - paymentMap[a]);
-            const payValues = payLabels.map(l => paymentMap[l]);
-
-            // City Data
-            const cityMap = {};
-            data.forEach(row => {
-                if(row.city) {
-                    cityMap[row.city] = (cityMap[row.city] || 0) + (row.total_sales || 0);
-                }
-            });
-            const cityLabels = Object.keys(cityMap).sort((a,b) => cityMap[b] - cityMap[a]);
-            const cityValues = cityLabels.map(l => cityMap[l]);
-
-            // 3. Render Charts
-            renderCategoryChart(catLabels, catValues);
-            renderTrendChart(trendLabels, trendValues);
-            renderPaymentChart(payLabels, payValues);
-            renderCityChart(cityLabels, cityValues);
-            
-            // 4. Render Table
-            renderTable(data);
+            // Re-render UI
+            updateDashboard();
         }
 
-        function renderCategoryChart(labels, data) {
+        // Reset all filters to default
+        function resetFilters() {
+            document.getElementById('filter-category').value = 'All';
+            document.getElementById('filter-city').value = 'All';
+            document.getElementById('filter-payment').value = 'All';
+            document.getElementById('filter-search').value = '';
+            
+            activeDataset = [...rawDataset];
+            document.getElementById('data-rows-count').innerText = activeDataset.length;
+            
+            updateDashboard();
+        }
+
+        // Update KPIs, Charts, Tables, and Statistics
+        function updateDashboard() {
+            calculateKPIs();
+            renderCharts();
+            renderTable();
+            renderStatsTable();
+            renderCorrelationScores();
+        }
+
+        // KPI Calculations
+        function calculateKPIs() {
+            if (activeDataset.length === 0) {
+                document.getElementById('kpi-revenue').innerText = '₹0';
+                document.getElementById('kpi-orders').innerText = '0';
+                document.getElementById('kpi-aov').innerText = '₹0';
+                document.getElementById('kpi-category').innerText = 'N/A';
+                return;
+            }
+
+            const totalRev = activeDataset.reduce((sum, r) => sum + (r.total_sales || 0), 0);
+            const totalOrd = activeDataset.length;
+            const aov = totalRev / totalOrd;
+
+            // Find top category
+            const categories = {};
+            activeDataset.forEach(r => {
+                if (r.category) categories[r.category] = (categories[r.category] || 0) + (r.total_sales || 0);
+            });
+            const topCategory = Object.keys(categories).length > 0 
+                ? Object.keys(categories).reduce((a, b) => categories[a] > categories[b] ? a : b)
+                : 'N/A';
+
+            document.getElementById('kpi-revenue').innerText = formatCurrency(totalRev);
+            document.getElementById('kpi-orders').innerText = totalOrd;
+            document.getElementById('kpi-aov').innerText = formatCurrency(aov);
+            document.getElementById('kpi-category').innerText = topCategory;
+        }
+
+        // Switch Navigation Tabs
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => {
+                c.classList.add('hidden');
+                c.classList.remove('block');
+            });
+
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            const content = document.getElementById('content-' + tabId);
+            content.classList.remove('hidden');
+            content.classList.add('block');
+
+            // Trigger chart redraw to prevent width/height calculation bugs on hidden canvas
+            if (tabId === 'dashboard' || tabId === 'stats') {
+                renderCharts();
+            }
+        }
+
+        // Render Charts with Chart.js
+        function renderCharts() {
+            // Check active tab to avoid rendering in hidden canvases
+            const isDashboardActive = !document.getElementById('content-dashboard').classList.contains('hidden');
+            const isStatsActive = !document.getElementById('content-stats').classList.contains('hidden');
+
+            if (isDashboardActive) {
+                renderCategoryChart();
+                renderTrendChart();
+                renderPaymentChart();
+                renderCityChart();
+            }
+            if (isStatsActive) {
+                renderScatterChart();
+            }
+        }
+
+        function renderCategoryChart() {
             const ctx = document.getElementById('categoryChart').getContext('2d');
-            new Chart(ctx, {
+            
+            // Group and Sort category sales
+            const map = {};
+            activeDataset.forEach(r => {
+                if (r.category) map[r.category] = (map[r.category] || 0) + (r.total_sales || 0);
+            });
+            const labels = Object.keys(map).sort((a,b) => map[b] - map[a]);
+            const data = labels.map(l => map[l]);
+
+            if (catChartInstance) catChartInstance.destroy();
+
+            catChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: data,
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'],
-                        borderRadius: 6,
-                        borderSkipped: false
+                        backgroundColor: ['rgba(56, 189, 248, 0.75)', 'rgba(99, 102, 241, 0.75)', 'rgba(16, 185, 129, 0.75)', 'rgba(236, 72, 153, 0.75)'],
+                        borderColor: ['#38bdf8', '#6366f1', '#10b981', '#ec4899'],
+                        borderWidth: 1.5,
+                        borderRadius: 6
                     }]
                 },
                 options: {
-                    ...commonOptions,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: { label: (c) => ` Sales: ${formatCurrency(c.raw)}` }
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { borderDash: [4, 4], color: '#e2e8f0' },
-                            ticks: { callback: value => '₹' + (value/1000) + 'k' }
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8', callback: (v) => '₹' + v }
                         },
-                        x: { grid: { display: false } }
-                    },
-                    plugins: {
-                        ...commonOptions.plugins,
-                        tooltip: {
-                            callbacks: { label: (context) => formatCurrency(context.raw) }
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
                         }
                     }
                 }
             });
         }
 
-        function renderTrendChart(labels, data) {
+        function renderTrendChart() {
             const ctx = document.getElementById('trendChart').getContext('2d');
-            
-            // Create gradient
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
+
+            const monthMap = {};
+            activeDataset.forEach(r => {
+                if (r.month_name) monthMap[r.month_name] = (monthMap[r.month_name] || 0) + (r.total_sales || 0);
+            });
+
+            const monthOrder = ['January', 'February', 'March', 'April'];
+            const labels = monthOrder.filter(m => monthMap[m] !== undefined);
+            const data = labels.map(m => monthMap[m]);
+
+            if (trendChartInstance) trendChartInstance.destroy();
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.35)');
             gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
 
-            new Chart(ctx, {
+            trendChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: data,
-                        borderColor: '#6366f1',
+                        borderColor: '#818cf8',
                         borderWidth: 3,
                         backgroundColor: gradient,
                         fill: true,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#6366f1',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#818cf8',
                         pointHoverRadius: 6,
-                        tension: 0.4 // Smooth curve
+                        tension: 0.35
                     }]
                 },
                 options: {
-                    ...commonOptions,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: { label: (c) => ` Revenue: ${formatCurrency(c.raw)}` }
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { borderDash: [4, 4], color: '#e2e8f0' },
-                            ticks: { callback: value => '₹' + (value/1000) + 'k' }
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8', callback: (v) => '₹' + v }
                         },
-                        x: { grid: { display: false } }
-                    },
-                    plugins: {
-                        ...commonOptions.plugins,
-                        tooltip: {
-                            callbacks: { label: (context) => formatCurrency(context.raw) }
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
                         }
                     }
                 }
             });
         }
 
-        function renderPaymentChart(labels, data) {
+        function renderPaymentChart() {
             const ctx = document.getElementById('paymentChart').getContext('2d');
-            new Chart(ctx, {
+
+            const map = {};
+            activeDataset.forEach(r => {
+                if (r.payment_method) map[r.payment_method] = (map[r.payment_method] || 0) + 1;
+            });
+            const labels = Object.keys(map);
+            const data = labels.map(l => map[l]);
+
+            if (payChartInstance) payChartInstance.destroy();
+
+            payChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: data,
-                        backgroundColor: ['#ec4899', '#8b5cf6', '#3b82f6', '#14b8a6', '#f59e0b'],
-                        borderWidth: 0,
-                        hoverOffset: 4
+                        backgroundColor: [
+                            'rgba(236, 72, 153, 0.7)',
+                            'rgba(99, 102, 241, 0.7)',
+                            'rgba(56, 189, 248, 0.7)',
+                            'rgba(16, 185, 129, 0.7)'
+                        ],
+                        borderColor: '#1e293b',
+                        borderWidth: 2
                     }]
                 },
                 options: {
@@ -379,81 +944,303 @@
                     cutout: '70%',
                     plugins: {
                         legend: {
-                            display: true,
                             position: 'right',
                             labels: {
-                                usePointStyle: true,
-                                padding: 20,
-                                font: { family: "'Inter', sans-serif" }
+                                color: '#94a3b8',
+                                boxWidth: 12,
+                                font: { size: 11 }
                             }
                         },
                         tooltip: {
-                            callbacks: { label: (context) => ` ${context.raw} Orders` }
+                            callbacks: { label: (c) => ` ${c.label}: ${c.raw} orders` }
                         }
                     }
                 }
             });
         }
 
-        function renderCityChart(labels, data) {
+        function renderCityChart() {
             const ctx = document.getElementById('cityChart').getContext('2d');
-            new Chart(ctx, {
+
+            const map = {};
+            activeDataset.forEach(r => {
+                if (r.city) map[r.city] = (map[r.city] || 0) + (r.total_sales || 0);
+            });
+            const labels = Object.keys(map).sort((a,b) => map[b] - map[a]);
+            const data = labels.map(l => map[l]);
+
+            if (cityChartInstance) cityChartInstance.destroy();
+
+            cityChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: data,
-                        backgroundColor: '#14b8a6',
-                        borderRadius: 4,
+                        backgroundColor: 'rgba(16, 185, 129, 0.75)',
+                        borderColor: '#10b981',
+                        borderWidth: 1.5,
+                        borderRadius: 4
                     }]
                 },
                 options: {
-                    ...commonOptions,
-                    indexAxis: 'y', // Makes it horizontal
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: { label: (c) => ` Sales: ${formatCurrency(c.raw)}` }
+                        }
+                    },
                     scales: {
                         x: {
                             beginAtZero: true,
-                            grid: { borderDash: [4, 4], color: '#e2e8f0' },
-                            ticks: { callback: value => '₹' + (value/1000) + 'k' }
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8', callback: (v) => '₹' + v }
                         },
-                        y: { grid: { display: false } }
-                    },
-                    plugins: {
-                        ...commonOptions.plugins,
-                        tooltip: {
-                            callbacks: { label: (context) => formatCurrency(context.raw) }
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
                         }
                     }
                 }
             });
         }
 
-        function renderTable(data) {
-            // Sort by total_sales descending and get top 5
-            const topOrders = [...data].sort((a, b) => (b.total_sales || 0) - (a.total_sales || 0)).slice(0, 5);
-            
+        function renderScatterChart() {
+            const ctx = document.getElementById('scatterChart').getContext('2d');
+
+            const categoryColors = {
+                'Electronics': 'rgba(56, 189, 248, 0.85)',
+                'Clothing': 'rgba(99, 102, 241, 0.85)',
+                'Furniture': 'rgba(16, 185, 129, 0.85)',
+                'Unknown': 'rgba(236, 72, 153, 0.85)'
+            };
+
+            const datasetsMap = {};
+            activeDataset.forEach(row => {
+                const cat = row.category || 'Unknown';
+                if (!datasetsMap[cat]) {
+                    datasetsMap[cat] = {
+                        label: cat,
+                        data: [],
+                        backgroundColor: categoryColors[cat] || 'rgba(148, 163, 184, 0.85)',
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    };
+                }
+                datasetsMap[cat].data.push({
+                    x: row.price,
+                    y: row.total_sales,
+                    product: row.product,
+                    qty: row.quantity
+                });
+            });
+
+            if (scatterChartInstance) scatterChartInstance.destroy();
+
+            scatterChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: Object.values(datasetsMap)
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#94a3b8' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const p = context.raw;
+                                    return ` ${p.product} (Qty: ${p.qty}) | Price: ${formatCurrency(p.x)} | Sales: ${formatCurrency(p.y)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Unit Price (₹)', color: '#94a3b8', font: { weight: 'bold' } },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Total Revenue (₹)', color: '#94a3b8', font: { weight: 'bold' } },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render Table Rows
+        function renderTable() {
             const tbody = document.getElementById('table-body');
-            tbody.innerHTML = ''; // Clear existing
-            
-            topOrders.forEach(order => {
+            tbody.innerHTML = '';
+
+            // Sort by sales descending
+            const sortedData = [...activeDataset].sort((a,b) => (b.total_sales || 0) - (a.total_sales || 0)).slice(0, 8);
+
+            if (sortedData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-500">No transactions match the selected filters.</td></tr>`;
+                return;
+            }
+
+            sortedData.forEach(row => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.className = "hover:bg-slate-800/20 transition-colors border-b border-slate-800/30";
                 
                 tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#${order.order_id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${order.date}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">${order.customer_name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-slate-900">${order.product}</div>
-                        <div class="text-xs text-slate-500">${order.category}</div>
+                    <td class="py-3 px-4 font-bold text-sky-400">#${row.order_id}</td>
+                    <td class="py-3 px-4 text-slate-400 text-xs">${row.date || '-'}</td>
+                    <td class="py-3 px-4 font-medium text-slate-200">${row.customer_name || 'Unknown'}</td>
+                    <td class="py-3 px-4">
+                        <span class="text-slate-200 font-medium block">${row.product || '-'}</span>
+                        <span class="text-xs text-slate-500">${row.category || 'Unknown'}</span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900 text-right">${formatCurrency(order.total_sales)}</td>
+                    <td class="py-3 px-4 text-slate-300">${row.city || '-'}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 text-xs rounded-full font-medium ${
+                            row.payment_method === 'UPI' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' :
+                            row.payment_method === 'Credit Card' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
+                            row.payment_method === 'Debit Card' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' :
+                            'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        }">${row.payment_method || '-'}</span>
+                    </td>
+                    <td class="py-3 px-4 text-right font-extrabold text-slate-100">${formatCurrency(row.total_sales || 0)}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Initialize
+        // Descriptive Statistics Calculations
+        function getStats(data, key) {
+            const values = data.map(row => Number(row[key])).filter(v => !isNaN(v) && v !== null && v !== undefined);
+            if (values.length === 0) {
+                return { count: 0, sum: 0, mean: 0, median: 0, min: 0, max: 0, std: 0, q1: 0, q3: 0, iqr: 0 };
+            }
+            const count = values.length;
+            const sum = values.reduce((a, b) => a + b, 0);
+            const mean = sum / count;
+            const sorted = [...values].sort((a, b) => a - b);
+            const min = sorted[0];
+            const max = sorted[sorted.length - 1];
+            
+            // Median
+            let median;
+            if (count % 2 !== 0) {
+                median = sorted[Math.floor(count / 2)];
+            } else {
+                median = (sorted[count / 2 - 1] + sorted[count / 2]) / 2;
+            }
+            
+            // Q1 & Q3
+            const getPercentile = (arr, p) => {
+                if (arr.length === 1) return arr[0];
+                const idx = p * (arr.length - 1);
+                const low = Math.floor(idx);
+                const high = Math.ceil(idx);
+                return arr[low] + (arr[high] - arr[low]) * (idx - low);
+            };
+            const q1 = getPercentile(sorted, 0.25);
+            const q3 = getPercentile(sorted, 0.75);
+            const iqr = q3 - q1;
+            
+            // Standard Deviation
+            let std = 0;
+            if (count > 1) {
+                const sqDiffSum = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0);
+                std = Math.sqrt(sqDiffSum / (count - 1));
+            }
+            
+            return { count, sum, mean, median, min, max, std, q1, q3, iqr };
+        }
+
+        // Pearson Correlation Calculation
+        function getCorrelation(data, key1, key2) {
+            const pairs = data.map(row => [Number(row[key1]), Number(row[key2])]).filter(p => !isNaN(p[0]) && !isNaN(p[1]));
+            if (pairs.length < 2) return 0;
+            const n = pairs.length;
+            const sum1 = pairs.reduce((sum, p) => sum + p[0], 0);
+            const sum2 = pairs.reduce((sum, p) => sum + p[1], 0);
+            const mean1 = sum1 / n;
+            const mean2 = sum2 / n;
+            
+            let num = 0;
+            let den1 = 0;
+            let den2 = 0;
+            for (let i = 0; i < n; i++) {
+                const d1 = pairs[i][0] - mean1;
+                const d2 = pairs[i][1] - mean2;
+                num += d1 * d2;
+                den1 += d1 * d1;
+                den2 += d2 * d2;
+            }
+            if (den1 === 0 || den2 === 0) return 0;
+            return num / Math.sqrt(den1 * den2);
+        }
+
+        // Render Stats Table
+        function renderStatsTable() {
+            const tbody = document.getElementById('stats-table-body');
+            tbody.innerHTML = '';
+
+            const priceStats = getStats(activeDataset, 'price');
+            const qtyStats = getStats(activeDataset, 'quantity');
+            const salesStats = getStats(activeDataset, 'total_sales');
+
+            const metrics = [
+                { name: 'Count (N)', p: priceStats.count, q: qtyStats.count, s: salesStats.count, isCurrency: false },
+                { name: 'Mean (Average)', p: priceStats.mean, q: qtyStats.mean, s: salesStats.mean, isCurrency: true },
+                { name: 'Median (50th %)', p: priceStats.median, q: qtyStats.median, s: salesStats.median, isCurrency: true },
+                { name: 'Standard Deviation (σ)', p: priceStats.std, q: qtyStats.std, s: salesStats.std, isCurrency: true },
+                { name: 'Minimum', p: priceStats.min, q: qtyStats.min, s: salesStats.min, isCurrency: true },
+                { name: 'Maximum', p: priceStats.max, q: qtyStats.max, s: salesStats.max, isCurrency: true },
+                { name: 'Lower Quartile (Q1)', p: priceStats.q1, q: qtyStats.q1, s: salesStats.q1, isCurrency: true },
+                { name: 'Upper Quartile (Q3)', p: priceStats.q3, q: qtyStats.q3, s: salesStats.q3, isCurrency: true },
+                { name: 'IQR (Interquartile Range)', p: priceStats.iqr, q: qtyStats.iqr, s: salesStats.iqr, isCurrency: true }
+            ];
+
+            metrics.forEach((m, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/10 border-b border-slate-800/50";
+                
+                const fmtP = m.isCurrency ? formatCurrency(m.p) : m.p.toLocaleString();
+                const fmtQ = m.name === 'Count (N)' ? m.q : m.q.toFixed(2);
+                const fmtS = m.isCurrency ? formatCurrency(m.s) : m.s.toLocaleString();
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-4 font-medium text-slate-300">${m.name}</td>
+                    <td class="py-2.5 px-4 text-right text-slate-100 font-mono">${fmtP}</td>
+                    <td class="py-2.5 px-4 text-right text-slate-100 font-mono">${fmtQ}</td>
+                    <td class="py-2.5 px-4 text-right text-slate-100 font-mono">${fmtS}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render Correlation Metric indicators
+        function renderCorrelationScores() {
+            const corrPriceSales = getCorrelation(activeDataset, 'price', 'total_sales');
+            const corrPriceQty = getCorrelation(activeDataset, 'price', 'quantity');
+            const corrQtySales = getCorrelation(activeDataset, 'quantity', 'total_sales');
+
+            // Format scores
+            document.getElementById('corr-price-sales').innerText = corrPriceSales.toFixed(3);
+            document.getElementById('corr-price-qty').innerText = corrPriceQty.toFixed(3);
+            document.getElementById('corr-qty-sales').innerText = corrQtySales.toFixed(3);
+
+            // Set progress bars width
+            document.getElementById('corr-bar-price-sales').style.width = Math.abs(corrPriceSales * 100) + '%';
+            document.getElementById('corr-bar-price-qty').style.width = Math.abs(corrPriceQty * 100) + '%';
+            document.getElementById('corr-bar-qty-sales').style.width = Math.abs(corrQtySales * 100) + '%';
+        }
+
+        // Initialize App on DOM load
         document.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
