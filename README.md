@@ -69,40 +69,65 @@ data-analysis-project/
 │
 ├── data/
 │   ├── raw_data.csv
-│   └── cleaned_data.csv
+│   ├── cleaned_data.csv
+│   └── ml_results.csv
 │
 ├── notebook/
-│   └── analysis.ipynb
+│   ├── analysis.ipynb
+│   └── ml_model.ipynb
 │
 ├── scripts/
-│   └── data_analysis.py
+│   ├── data_analysis.py
+│   └── ml_model.py
 │
 ├── images/
 │   ├── chart1_sales_by_category.png
-│   ├── chart2_monthly_revenue.png
-│   ├── chart3_payment_distribution.png
-│   ├── chart4_top_products.png
-│   ├── chart5_sales_by_city.png
-│   ├── chart6_correlation_heatmap.png
-│   ├── chart7_sales_distribution.png
-│   └── chart8_dashboard.png
+│   ├── ...
+│   ├── chart8_dashboard.png
+│   ├── ml_chart1_accuracy_comparison.png
+│   ├── ml_chart2_confusion_matrices.png
+│   ├── ml_chart3_roc_curves.png
+│   ├── ml_chart4_feature_importance.png
+│   └── ml_chart5_metrics_comparison.png
 │
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+└── run_dashboard.py
 ```
+
+---
+
+## 🤖 Predictive Modeling (Machine Learning)
+
+Applied supervised machine learning algorithms to classify orders into target categories based on pricing, quantity, and total sales.
+
+* **Algorithms Evaluated**: Logistic Regression, Decision Tree, Random Forest
+* **Evaluation Metrics**: Accuracy, Precision, Recall, F1-Score, Confusion Matrices, ROC Curves
+* **Best Model**: **Random Forest** (~53.8% accuracy on 75/25 stratified split)
+* **Results**: Exported to `data/ml_results.csv` and visual charts saved to `images/`
 
 ---
 
 ## ▶️ How to Run
 
-1. Install dependencies:
-   ```
+1. **Install dependencies**:
+   ```bash
    pip install -r requirements.txt
    ```
 
-2. Run the script:
-   ```
+2. **Run Data Analysis & Cleaning**:
+   ```bash
    python scripts/data_analysis.py
+   ```
+
+3. **Run ML Predictive Modeling**:
+   ```bash
+   python scripts/ml_model.py
+   ```
+
+4. **Launch Interactive Dashboard**:
+   ```bash
+   python run_dashboard.py
    ```
 
 ---
