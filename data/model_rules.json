@@ -1,0 +1,245 @@
+{
+  "feature_names": [
+    "price",
+    "quantity",
+    "month",
+    "city_encoded",
+    "payment_method_encoded",
+    "day_of_week_encoded"
+  ],
+  "encoders": {
+    "city": [
+      "Bangalore",
+      "Chennai",
+      "Delhi",
+      "Hyderabad",
+      "Kolkata",
+      "Mumbai"
+    ],
+    "payment_method": [
+      "Credit Card",
+      "Debit Card",
+      "EMI",
+      "UPI"
+    ],
+    "day_of_week": [
+      "Friday",
+      "Monday",
+      "Saturday",
+      "Sunday",
+      "Thursday",
+      "Tuesday",
+      "Wednesday"
+    ],
+    "target": [
+      "Clothing",
+      "Electronics",
+      "Furniture"
+    ]
+  },
+  "tree": {
+    "type": "split",
+    "feature": "price",
+    "threshold": 1899.5,
+    "left": {
+      "type": "split",
+      "feature": "price",
+      "threshold": 1449.0,
+      "left": {
+        "type": "split",
+        "feature": "quantity",
+        "threshold": 3.5,
+        "left": {
+          "type": "split",
+          "feature": "day_of_week_encoded",
+          "threshold": 3.5,
+          "left": {
+            "type": "leaf",
+            "class_index": 0,
+            "class_name": "Clothing",
+            "value": [
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          "right": {
+            "type": "split",
+            "feature": "city_encoded",
+            "threshold": 1.5,
+            "left": {
+              "type": "leaf",
+              "class_index": 1,
+              "class_name": "Electronics",
+              "value": [
+                0.0,
+                1.0,
+                0.0
+              ]
+            },
+            "right": {
+              "type": "leaf",
+              "class_index": 0,
+              "class_name": "Clothing",
+              "value": [
+                0.75,
+                0.25,
+                0.0
+              ]
+            }
+          }
+        },
+        "right": {
+          "type": "leaf",
+          "class_index": 1,
+          "class_name": "Electronics",
+          "value": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        }
+      },
+      "right": {
+        "type": "split",
+        "feature": "day_of_week_encoded",
+        "threshold": 5.5,
+        "left": {
+          "type": "leaf",
+          "class_index": 1,
+          "class_name": "Electronics",
+          "value": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "right": {
+          "type": "leaf",
+          "class_index": 0,
+          "class_name": "Clothing",
+          "value": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "right": {
+      "type": "split",
+      "feature": "city_encoded",
+      "threshold": 2.5,
+      "left": {
+        "type": "split",
+        "feature": "day_of_week_encoded",
+        "threshold": 4.5,
+        "left": {
+          "type": "split",
+          "feature": "price",
+          "threshold": 2749.0,
+          "left": {
+            "type": "split",
+            "feature": "month",
+            "threshold": 1.5,
+            "left": {
+              "type": "leaf",
+              "class_index": 0,
+              "class_name": "Clothing",
+              "value": [
+                1.0,
+                0.0,
+                0.0
+              ]
+            },
+            "right": {
+              "type": "leaf",
+              "class_index": 1,
+              "class_name": "Electronics",
+              "value": [
+                0.0,
+                1.0,
+                0.0
+              ]
+            }
+          },
+          "right": {
+            "type": "leaf",
+            "class_index": 0,
+            "class_name": "Clothing",
+            "value": [
+              1.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "right": {
+          "type": "leaf",
+          "class_index": 2,
+          "class_name": "Furniture",
+          "value": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        }
+      },
+      "right": {
+        "type": "split",
+        "feature": "day_of_week_encoded",
+        "threshold": 1.0,
+        "left": {
+          "type": "leaf",
+          "class_index": 1,
+          "class_name": "Electronics",
+          "value": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "right": {
+          "type": "split",
+          "feature": "price",
+          "threshold": 2199.5,
+          "left": {
+            "type": "split",
+            "feature": "price",
+            "threshold": 2049.5,
+            "left": {
+              "type": "leaf",
+              "class_index": 2,
+              "class_name": "Furniture",
+              "value": [
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            "right": {
+              "type": "leaf",
+              "class_index": 1,
+              "class_name": "Electronics",
+              "value": [
+                0.0,
+                1.0,
+                0.0
+              ]
+            }
+          },
+          "right": {
+            "type": "leaf",
+            "class_index": 2,
+            "class_name": "Furniture",
+            "value": [
+              0.0,
+              0.0,
+              1.0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -70,7 +70,8 @@ data-analysis-project/
 ├── data/
 │   ├── raw_data.csv
 │   ├── cleaned_data.csv
-│   └── ml_results.csv
+│   ├── ml_results.csv
+│   └── model_rules.json
 │
 ├── notebook/
 │   ├── analysis.ipynb
@@ -104,7 +105,9 @@ Applied supervised machine learning algorithms to classify orders into target ca
 * **Algorithms Evaluated**: Logistic Regression, Decision Tree, Random Forest
 * **Evaluation Metrics**: Accuracy, Precision, Recall, F1-Score, Confusion Matrices, ROC Curves
 * **Best Model**: **Random Forest** (~53.8% accuracy on 75/25 stratified split)
-* **Results**: Exported to `data/ml_results.csv` and visual charts saved to `images/`
+* **Interactive Prediction Playground**: Serialize Decision Tree to `data/model_rules.json` to enable real-time, explainable category predictions directly in the dashboard browser tab.
+* **Results**: Exported metrics to `data/ml_results.csv` and visual charts saved to `images/`
+
 
 ---
 

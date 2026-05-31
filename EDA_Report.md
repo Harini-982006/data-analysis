@@ -134,3 +134,29 @@ Based on the findings, the following strategies are recommended:
    * Investigate the exact causes of the March peak (promotional campaigns, financial year-end bonuses, etc.) and plan mini-campaigns in slower months (like February or April) to stabilize monthly revenue.
 5. **Implement Data Validation Filters**:
    * Introduce automated validation on the e-commerce check-out/admin system to reject negative prices, zero quantities, or extreme values (e.g., ₹85,000 for a power strip) before they enter the database.
+
+---
+
+## 🤖 7. Predictive Modeling & Machine Learning Findings
+
+To add proactive capability, supervised machine learning was implemented to predict the product category (`Clothing`, `Electronics`, or `Furniture`) based on transaction attributes: unit price, quantity, city, payment method, transaction month, and day of week.
+
+### A. Model Performance Evaluation
+Three distinct classification models were trained on a 75/25 stratified split (36 training samples, 13 test samples):
+
+| Classifier | Accuracy (%) | Weighted Precision | Weighted Recall | Weighted F1-Score |
+| :--- | :---: | :---: | :---: | :---: |
+| **Logistic Regression** | 38.5% | 0.365 | 0.385 | 0.371 |
+| **Decision Tree** | 46.2% | 0.462 | 0.462 | 0.458 |
+| **Random Forest** | **53.8%** | **0.675** | **0.538** | **0.480** |
+
+### B. Core Findings & Insights
+1. **Best Performing Classifier**: **Random Forest** achieved the highest overall accuracy (~53.8%) and weighted precision (~67.5%). It exhibits high robustness against the small sample size, correctly classifying 100% of Electronics transactions in the test set.
+2. **Feature Importance (Random Forest)**:
+   * **Unit Price** is the dominant predictor (~0.45 score). This matches our descriptive analysis showing clear price segmentation (Clothing ranges from ₹299 to ₹1,500, Electronics from ₹999 to ₹4,999, and Furniture from ₹2,500 to ₹5,600).
+   * **Weekday** (~0.14) and **City** (~0.13) represent the next most significant split criteria.
+   * **Month** (~0.11) and **Quantity** (~0.08) exhibit the lowest influence.
+3. **Deployment Strategy**:
+   * The Decision Tree structure and Label Encoders were serialized to a JSON ruleset (`data/model_rules.json`).
+   * This structure is loaded dynamically in the browser dashboard tab, allowing the sales team to enter hypothetical transactions and instantly see predicted categories and decision paths without requiring any active backend server (edge computing).
+

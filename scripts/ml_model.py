@@ -432,6 +432,58 @@ results_df = pd.DataFrame({
 results_df.to_csv(os.path.join(DATA_DIR, 'ml_results.csv'), index=False)
 print("\n✅ Model results saved to 'data/ml_results.csv'")
 
+# Export Decision Tree structure for client-side JavaScript evaluation
+import json
+
+def export_dt_tree(tree, feature_names, class_names):
+    tree_ = tree.tree_
+    feature_name = [
+        feature_names[i] if i != -2 else "undefined!"
+        for i in tree_.feature
+    ]
+    
+    def recurse(node):
+        if tree_.feature[node] != -2:
+            name = feature_name[node]
+            threshold = tree_.threshold[node]
+            left_child = tree_.children_left[node]
+            right_child = tree_.children_right[node]
+            return {
+                "type": "split",
+                "feature": name,
+                "threshold": float(threshold),
+                "left": recurse(left_child),
+                "right": recurse(right_child)
+            }
+        else:
+            value = tree_.value[node][0]
+            predicted_class_idx = int(np.argmax(value))
+            return {
+                "type": "leaf",
+                "class_index": predicted_class_idx,
+                "class_name": class_names[predicted_class_idx],
+                "value": [float(val) for val in value]
+            }
+            
+    return recurse(0)
+
+dt_model = results['Decision Tree']['model']
+model_rules = {
+    "feature_names": list(X.columns),
+    "encoders": {
+        "city": list(label_encoders['city'].classes_),
+        "payment_method": list(label_encoders['payment_method'].classes_),
+        "day_of_week": list(label_encoders['day_of_week'].classes_),
+        "target": list(le_target.classes_)
+    },
+    "tree": export_dt_tree(dt_model, list(X.columns), list(le_target.classes_))
+}
+
+with open(os.path.join(DATA_DIR, 'model_rules.json'), 'w') as f:
+    json.dump(model_rules, f, indent=2)
+print("✅ Decision Tree model rules saved to 'data/model_rules.json'")
+
+
 # ─────────────────────────────────────────────────────────────
 # 🔹 STEP 11: SUMMARY REPORT
 # ─────────────────────────────────────────────────────────────
